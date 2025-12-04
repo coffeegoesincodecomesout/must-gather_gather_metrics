@@ -1,6 +1,7 @@
 # must-gather_gather_metrics
 
 `oc adm must-gather` can now collect metrics from a given cluster
+This feature is available from 4.18 + 
 
 ```
 oc adm must-gather -- gather_metrics \
