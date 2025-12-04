@@ -5,7 +5,7 @@ mkdir tmp/
 rm -rf tmp/*
 
 #Get desired PROM_VERSION
-echo -n "Insert desired Prometheus version - example '2.45.0' :"
+echo -n "Insert desired Prometheus version - Openshift 4.18 uses '2.51.1' :"
 read PROM_VERSION
 
 #Download the desired PROM_VERSION
