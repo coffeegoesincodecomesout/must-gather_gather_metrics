@@ -1,6 +1,7 @@
 #!/bin/bash
 
 #Clean up
+mkdir tmp/
 rm -rf tmp/*
 
 #Get desired PROM_VERSION
