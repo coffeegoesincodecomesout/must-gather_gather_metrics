@@ -17,4 +17,4 @@ Running the launcher will result in the collected data being available via a run
 ./launcher.sh
 ```
 
-Browse to localhost:9090 to start querying
+Browse to http://localhost:9090 to start querying
