@@ -5,7 +5,7 @@ mkdir tmp/
 rm -rf tmp/*
 
 #Get desired PROM_VERSION
-echo -n "insert desired Prometheus version - example '2.45.0' :"
+echo -n "Insert desired Prometheus version - example '2.45.0' :"
 read PROM_VERSION
 
 #Download the desired PROM_VERSION
