@@ -16,7 +16,7 @@ mkdir tmp/prometheus-config
 touch tmp/prometheus-config/prometheus.yml
 
 #Create tsdb blocks from openmetrics 
-tmp/prometheus-2.45.0.linux-amd64/promtool tsdb create-blocks-from openmetrics must-gather.local.*/quay-io-openshift-*/monitoring/metrics/metrics.openmetrics tmp/prometheus-2.45.0.linux-amd64/data/
+tmp/prometheus-$PROM_VERSION.linux-amd64/promtool tsdb create-blocks-from openmetrics must-gather.local.*/quay-io-openshift-*/monitoring/metrics/metrics.openmetrics tmp/prometheus-$PROM_VERSION.linux-amd64/data/
 
 #Launch the container
-podman run --rm -p 9090:9090/tcp -v $PWD/tmp/prometheus-2.45.0.linux-amd64/data:/prometheus:U,Z --privileged quay.io/prometheus/prometheus --storage.tsdb.path=/prometheus --config.file=/dev/null
+podman run --rm -p 9090:9090/tcp -v $PWD/tmp/prometheus-$PROM_VERSION.linux-amd64/data:/prometheus:U,Z --privileged quay.io/prometheus/prometheus --storage.tsdb.path=/prometheus --config.file=/dev/null
