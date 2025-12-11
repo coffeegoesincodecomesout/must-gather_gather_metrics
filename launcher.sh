@@ -3,9 +3,19 @@
 #Create tmp 
 mkdir -p tmp/
 
+#Set Prom version
+PROM_VERSION=""
+
+#Try to get the Prometheus version from the dump
+PROM_VERSION=`grep prometheus_build_info must-gather.local.*/quay-io-openshift-release-*/monitoring/metrics/metrics.openmetrics | head -n 1 | sed -n 's/.*version="\([^"]*\)".*/\1/p'` 
+
+echo $PROM_VERSION
+
 #Get desired PROM_VERSION
-echo -n "Insert desired Prometheus version - Openshift 4.18 uses '2.51.1' :"
-read PROM_VERSION
+if [ -z "$PROM_VERSION" ]; then
+  echo "Insert desired Prometheus version - Openshift 4.18 uses '2.51.1' :"
+  read PROM_VERSION
+fi
 
 #Download the desired PROM_VERSION
 curl -Ls https://github.com/prometheus/prometheus/releases/download/v$PROM_VERSION/prometheus-$PROM_VERSION.linux-amd64.tar.gz | tar -xvz -C tmp
