@@ -1,0 +1,19 @@
+kind: "GlobalDatasource"
+metadata:
+  name: "prometheus"
+spec:
+  default: true
+  display:
+    name: "Prometheus"
+    description: "Local Prometheus instance from must-gather data"
+  plugin:
+    kind: "PrometheusDatasource"
+    spec:
+      directUrl: "http://localhost:9090"
+      proxy:
+        kind: "HTTPProxy"
+        spec:
+          url: "http://localhost:9090"
+          allowedEndpoints:
+            - endpointPattern: "/api/v1/.*"
+              method: "GET"
