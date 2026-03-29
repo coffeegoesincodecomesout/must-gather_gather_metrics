@@ -1,0 +1,323 @@
+kind: "Dashboard"
+metadata:
+  name: "networking-health-and-performance"
+  project: "default"
+spec:
+  display:
+    name: "Networking Health and Performance"
+    description: "Network health and performance from must-gather data"
+  duration: "1h"
+  refreshInterval: "0s"
+  panels:
+    node-network-up:
+      kind: "Panel"
+      spec:
+        display:
+          name: "Network Interfaces Up"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "node_network_up{device!~'lo|veth.*|br.*|ovn.*|genev.*|tunl.*'}"
+    ovnkube-pod-creation-latency:
+      kind: "Panel"
+      spec:
+        display:
+          name: "OVN-K8s Pod Network Setup Latency p99 (seconds)"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "histogram_quantile(0.99, rate(ovnkube_master_pod_creation_latency_seconds_bucket[5m]))"
+    receive-bytes:
+      kind: "Panel"
+      spec:
+        display:
+          name: "Network Receive Throughput (bytes/s)"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "rate(node_network_receive_bytes_total{device!~'lo|veth.*|br.*|ovn.*|genev.*|tunl.*'}[5m])"
+    transmit-bytes:
+      kind: "Panel"
+      spec:
+        display:
+          name: "Network Transmit Throughput (bytes/s)"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "rate(node_network_transmit_bytes_total{device!~'lo|veth.*|br.*|ovn.*|genev.*|tunl.*'}[5m])"
+    receive-errors:
+      kind: "Panel"
+      spec:
+        display:
+          name: "Receive Errors (rate)"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "rate(node_network_receive_errs_total[5m])"
+    transmit-errors:
+      kind: "Panel"
+      spec:
+        display:
+          name: "Transmit Errors (rate)"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "rate(node_network_transmit_errs_total[5m])"
+    receive-drops:
+      kind: "Panel"
+      spec:
+        display:
+          name: "Receive Drops (rate)"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "rate(node_network_receive_drop_total[5m])"
+    transmit-drops:
+      kind: "Panel"
+      spec:
+        display:
+          name: "Transmit Drops (rate)"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "rate(node_network_transmit_drop_total[5m])"
+    dns-request-rate:
+      kind: "Panel"
+      spec:
+        display:
+          name: "DNS Request Rate"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "rate(coredns_dns_requests_total[5m])"
+    dns-latency-p99:
+      kind: "Panel"
+      spec:
+        display:
+          name: "DNS Request Latency p99 (seconds)"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "histogram_quantile(0.99, rate(coredns_dns_request_duration_seconds_bucket[5m]))"
+    dns-errors:
+      kind: "Panel"
+      spec:
+        display:
+          name: "DNS Error Responses (rate)"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "rate(coredns_dns_responses_total{rcode!='NOERROR'}[5m])"
+    firing-alerts:
+      kind: "Panel"
+      spec:
+        display:
+          name: "Firing Alerts"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "ALERTS{alertname=~'.*[Nn]etwork.*|.*[Oo][Vv][Nn].*|.*[Cc]ore[Dd][Nn][Ss].*|.*[Dd][Nn][Ss].*', alertstate='firing'}"
+  layouts:
+    - kind: "Grid"
+      spec:
+        display:
+          title: "Health"
+          collapse:
+            open: true
+        items:
+          - x: 0
+            y: 0
+            width: 12
+            height: 8
+            content:
+              $ref: "#/spec/panels/node-network-up"
+          - x: 12
+            y: 0
+            width: 12
+            height: 8
+            content:
+              $ref: "#/spec/panels/ovnkube-pod-creation-latency"
+    - kind: "Grid"
+      spec:
+        display:
+          title: "Throughput"
+          collapse:
+            open: true
+        items:
+          - x: 0
+            y: 0
+            width: 12
+            height: 8
+            content:
+              $ref: "#/spec/panels/receive-bytes"
+          - x: 12
+            y: 0
+            width: 12
+            height: 8
+            content:
+              $ref: "#/spec/panels/transmit-bytes"
+    - kind: "Grid"
+      spec:
+        display:
+          title: "Errors and Drops"
+          collapse:
+            open: true
+        items:
+          - x: 0
+            y: 0
+            width: 6
+            height: 8
+            content:
+              $ref: "#/spec/panels/receive-errors"
+          - x: 6
+            y: 0
+            width: 6
+            height: 8
+            content:
+              $ref: "#/spec/panels/transmit-errors"
+          - x: 12
+            y: 0
+            width: 6
+            height: 8
+            content:
+              $ref: "#/spec/panels/receive-drops"
+          - x: 18
+            y: 0
+            width: 6
+            height: 8
+            content:
+              $ref: "#/spec/panels/transmit-drops"
+    - kind: "Grid"
+      spec:
+        display:
+          title: "DNS (CoreDNS)"
+          collapse:
+            open: true
+        items:
+          - x: 0
+            y: 0
+            width: 8
+            height: 8
+            content:
+              $ref: "#/spec/panels/dns-request-rate"
+          - x: 8
+            y: 0
+            width: 8
+            height: 8
+            content:
+              $ref: "#/spec/panels/dns-latency-p99"
+          - x: 16
+            y: 0
+            width: 8
+            height: 8
+            content:
+              $ref: "#/spec/panels/dns-errors"
+    - kind: "Grid"
+      spec:
+        display:
+          title: "Alerts"
+          collapse:
+            open: true
+        items:
+          - x: 0
+            y: 0
+            width: 24
+            height: 8
+            content:
+              $ref: "#/spec/panels/firing-alerts"

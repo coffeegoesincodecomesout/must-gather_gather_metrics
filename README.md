@@ -21,6 +21,17 @@ oc adm must-gather -- gather_metrics \
 --match="prometheus_build_info"
 ```
 
+Networking dashboard:
+```
+oc adm must-gather -- gather_metrics \
+--min-time=$(date --date='2 hours ago' +%s%3N) \
+--match="{__name__=~\'node_network_.*\'}" \
+--match="{__name__=~\'ovnkube_.*\'}" \
+--match="{__name__=~\'coredns_.*\'}" \
+--match="ALERTS{alertname=~\'.*[Nn]etwork.*|.*[Oo][Vv][Nn].*|.*[Cc]ore[Dd][Nn][Ss].*|.*[Dd][Nn][Ss].*\'}" \
+--match="prometheus_build_info"
+```
+
 Run the must-gather command within this repo or place a pre collected `must-gather -- gather_metrics` directory into the root of this repo.
 
 
