@@ -1,7 +1,7 @@
 # must-gather_gather_metrics
 
 `oc adm must-gather` can now collect metrics from a given cluster
-This feature is available from 4.18 + 
+This feature is available from 4.18 +
 
 etcd dashboard:
 ```
@@ -12,32 +12,12 @@ oc adm must-gather -- gather_metrics \
 --match="prometheus_build_info"
 ```
 
-Loki dashboard:
-```
-oc adm must-gather -- gather_metrics \
---min-time=$(date --date='2 hours ago' +%s%3N) \
---match="{__name__=~\'loki_.*\'}" \
---match="ALERTS{alertname=~\'.*[Ll]oki.*\'}" \
---match="prometheus_build_info"
-```
-
 API performance dashboard:
 ```
 oc adm must-gather -- gather_metrics \
 --min-time=$(date --date='2 hours ago' +%s%3N) \
 --match="{__name__=~\'apiserver_.*\'}" \
 --match="ALERTS{alertname=~\'.*[Aa]pi[Ss]erver.*|.*[Kk]ube[Aa]pi.*\'}" \
---match="prometheus_build_info"
-```
-
-Prometheus overview dashboard:
-```
-oc adm must-gather -- gather_metrics \
---min-time=$(date --date='2 hours ago' +%s%3N) \
---match="{__name__=~\'prometheus_.*\'}" \
---match="{__name__=~\'scrape_.*\'}" \
---match="up" \
---match="ALERTS{alertname=~\'.*[Pp]rometheus.*\'}" \
 --match="prometheus_build_info"
 ```
 
@@ -76,6 +56,26 @@ oc adm must-gather -- gather_metrics \
 --match="{__name__=~\'ovnkube_.*\'}" \
 --match="{__name__=~\'coredns_.*\'}" \
 --match="ALERTS{alertname=~\'.*[Nn]etwork.*|.*[Oo][Vv][Nn].*|.*[Cc]ore[Dd][Nn][Ss].*|.*[Dd][Nn][Ss].*\'}" \
+--match="prometheus_build_info"
+```
+
+Loki dashboard:
+```
+oc adm must-gather -- gather_metrics \
+--min-time=$(date --date='2 hours ago' +%s%3N) \
+--match="{__name__=~\'loki_.*\'}" \
+--match="ALERTS{alertname=~\'.*[Ll]oki.*\'}" \
+--match="prometheus_build_info"
+```
+
+Prometheus overview dashboard:
+```
+oc adm must-gather -- gather_metrics \
+--min-time=$(date --date='2 hours ago' +%s%3N) \
+--match="{__name__=~\'prometheus_.*\'}" \
+--match="{__name__=~\'scrape_.*\'}" \
+--match="up" \
+--match="ALERTS{alertname=~\'.*[Pp]rometheus.*\'}" \
 --match="prometheus_build_info"
 ```
 
