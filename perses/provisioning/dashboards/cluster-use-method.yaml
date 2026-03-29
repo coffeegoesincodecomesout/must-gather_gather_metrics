@@ -1,0 +1,346 @@
+kind: "Dashboard"
+metadata:
+  name: "cluster-use-method"
+  project: "default"
+spec:
+  display:
+    name: "Cluster USE Method"
+    description: "Cluster-level Utilization, Saturation, and Errors from must-gather data"
+  duration: "1h"
+  refreshInterval: "0s"
+  panels:
+    cpu-utilization:
+      kind: "Panel"
+      spec:
+        display:
+          name: "CPU Utilization (requests / allocatable)"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "sum(kube_pod_container_resource_requests{resource='cpu'}) / sum(kube_node_status_allocatable{resource='cpu'})"
+    cpu-saturation:
+      kind: "Panel"
+      spec:
+        display:
+          name: "CPU Saturation (limits / allocatable)"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "sum(kube_pod_container_resource_limits{resource='cpu'}) / sum(kube_node_status_allocatable{resource='cpu'})"
+    cpu-errors:
+      kind: "Panel"
+      spec:
+        display:
+          name: "CPU Errors (throttled fraction)"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "sum(increase(container_cpu_cfs_throttled_periods_total[5m])) / sum(increase(container_cpu_cfs_periods_total[5m]))"
+    memory-utilization:
+      kind: "Panel"
+      spec:
+        display:
+          name: "Memory Utilization (requests / allocatable)"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "sum(kube_pod_container_resource_requests{resource='memory'}) / sum(kube_node_status_allocatable{resource='memory'})"
+    memory-saturation:
+      kind: "Panel"
+      spec:
+        display:
+          name: "Memory Saturation (limits / allocatable)"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "sum(kube_pod_container_resource_limits{resource='memory'}) / sum(kube_node_status_allocatable{resource='memory'})"
+    memory-errors:
+      kind: "Panel"
+      spec:
+        display:
+          name: "Memory Errors (OOM kills)"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "sum by (namespace, pod, container) (kube_pod_container_status_last_terminated_reason{reason='OOMKilled'})"
+    pod-utilization:
+      kind: "Panel"
+      spec:
+        display:
+          name: "Pod Utilization (running / allocatable)"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "sum(kube_pod_status_phase{phase='Running'}) / sum(kube_node_status_allocatable{resource='pods'})"
+    pod-saturation:
+      kind: "Panel"
+      spec:
+        display:
+          name: "Pod Saturation (pending pods)"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "sum by (namespace) (kube_pod_status_phase{phase='Pending'})"
+    pod-errors:
+      kind: "Panel"
+      spec:
+        display:
+          name: "Pod Errors (failed pods)"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "sum by (namespace) (kube_pod_status_phase{phase='Failed'})"
+    pv-utilization:
+      kind: "Panel"
+      spec:
+        display:
+          name: "PersistentVolume Utilization (used / capacity)"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "kubelet_volume_stats_used_bytes / kubelet_volume_stats_capacity_bytes"
+    pv-saturation:
+      kind: "Panel"
+      spec:
+        display:
+          name: "PersistentVolume Saturation (pending PVCs)"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "sum by (namespace) (kube_persistentvolumeclaim_status_phase{phase='Pending'})"
+    pv-errors:
+      kind: "Panel"
+      spec:
+        display:
+          name: "PersistentVolume Errors (failed / released PVs)"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "sum by (storageClassName) (kube_persistentvolume_status_phase{phase=~'Failed|Released'})"
+    firing-alerts:
+      kind: "Panel"
+      spec:
+        display:
+          name: "Firing Alerts"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "ALERTS{alertname=~'.*[Kk]ube.*|.*[Cc]luster.*', alertstate='firing'}"
+  layouts:
+    - kind: "Grid"
+      spec:
+        display:
+          title: "CPU"
+          collapse:
+            open: true
+        items:
+          - x: 0
+            y: 0
+            width: 8
+            height: 8
+            content:
+              $ref: "#/spec/panels/cpu-utilization"
+          - x: 8
+            y: 0
+            width: 8
+            height: 8
+            content:
+              $ref: "#/spec/panels/cpu-saturation"
+          - x: 16
+            y: 0
+            width: 8
+            height: 8
+            content:
+              $ref: "#/spec/panels/cpu-errors"
+    - kind: "Grid"
+      spec:
+        display:
+          title: "Memory"
+          collapse:
+            open: true
+        items:
+          - x: 0
+            y: 0
+            width: 8
+            height: 8
+            content:
+              $ref: "#/spec/panels/memory-utilization"
+          - x: 8
+            y: 0
+            width: 8
+            height: 8
+            content:
+              $ref: "#/spec/panels/memory-saturation"
+          - x: 16
+            y: 0
+            width: 8
+            height: 8
+            content:
+              $ref: "#/spec/panels/memory-errors"
+    - kind: "Grid"
+      spec:
+        display:
+          title: "Pods"
+          collapse:
+            open: true
+        items:
+          - x: 0
+            y: 0
+            width: 8
+            height: 8
+            content:
+              $ref: "#/spec/panels/pod-utilization"
+          - x: 8
+            y: 0
+            width: 8
+            height: 8
+            content:
+              $ref: "#/spec/panels/pod-saturation"
+          - x: 16
+            y: 0
+            width: 8
+            height: 8
+            content:
+              $ref: "#/spec/panels/pod-errors"
+    - kind: "Grid"
+      spec:
+        display:
+          title: "PersistentVolumes"
+          collapse:
+            open: true
+        items:
+          - x: 0
+            y: 0
+            width: 8
+            height: 8
+            content:
+              $ref: "#/spec/panels/pv-utilization"
+          - x: 8
+            y: 0
+            width: 8
+            height: 8
+            content:
+              $ref: "#/spec/panels/pv-saturation"
+          - x: 16
+            y: 0
+            width: 8
+            height: 8
+            content:
+              $ref: "#/spec/panels/pv-errors"
+    - kind: "Grid"
+      spec:
+        display:
+          title: "Alerts"
+          collapse:
+            open: true
+        items:
+          - x: 0
+            y: 0
+            width: 24
+            height: 8
+            content:
+              $ref: "#/spec/panels/firing-alerts"

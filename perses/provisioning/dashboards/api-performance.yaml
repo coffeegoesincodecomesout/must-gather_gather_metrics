@@ -1,0 +1,376 @@
+kind: "Dashboard"
+metadata:
+  name: "api-performance"
+  project: "default"
+spec:
+  display:
+    name: "API Performance"
+    description: "Kubernetes API server performance from must-gather data"
+  duration: "1h"
+  refreshInterval: "0s"
+  panels:
+    request-rate:
+      kind: "Panel"
+      spec:
+        display:
+          name: "Request Rate by Verb (req/s)"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "sum by (verb) (rate(apiserver_request_total[5m]))"
+    error-rate-5xx:
+      kind: "Panel"
+      spec:
+        display:
+          name: "Server Error Rate 5xx (req/s)"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "sum by (verb, resource) (rate(apiserver_request_total{code=~'5..'}[5m]))"
+    error-rate-4xx:
+      kind: "Panel"
+      spec:
+        display:
+          name: "Client Error Rate 4xx (req/s)"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "sum by (verb, resource) (rate(apiserver_request_total{code=~'4..'}[5m]))"
+    latency-p99:
+      kind: "Panel"
+      spec:
+        display:
+          name: "Request Latency p99 by Verb (seconds)"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "histogram_quantile(0.99, sum by (verb, le) (rate(apiserver_request_duration_seconds_bucket{verb!~'WATCH|CONNECT'}[5m])))"
+    latency-p50:
+      kind: "Panel"
+      spec:
+        display:
+          name: "Request Latency p50 by Verb (seconds)"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "histogram_quantile(0.50, sum by (verb, le) (rate(apiserver_request_duration_seconds_bucket{verb!~'WATCH|CONNECT'}[5m])))"
+    latency-by-resource-p99:
+      kind: "Panel"
+      spec:
+        display:
+          name: "Request Latency p99 by Resource (seconds)"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "histogram_quantile(0.99, sum by (resource, le) (rate(apiserver_request_duration_seconds_bucket{verb!~'WATCH|CONNECT'}[5m])))"
+    inflight-requests:
+      kind: "Panel"
+      spec:
+        display:
+          name: "Inflight Requests"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "apiserver_current_inflight_requests"
+    queued-requests:
+      kind: "Panel"
+      spec:
+        display:
+          name: "Queued Requests"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "apiserver_current_inqueue_requests"
+    dropped-requests:
+      kind: "Panel"
+      spec:
+        display:
+          name: "Dropped Requests (rate)"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "rate(apiserver_dropped_requests_total[5m])"
+    storage-objects:
+      kind: "Panel"
+      spec:
+        display:
+          name: "Stored Objects by Resource"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "apiserver_storage_objects"
+    storage-db-size:
+      kind: "Panel"
+      spec:
+        display:
+          name: "etcd DB Size (bytes)"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "apiserver_storage_db_total_size_in_bytes"
+    watch-requests:
+      kind: "Panel"
+      spec:
+        display:
+          name: "Long-running Watch Requests"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "apiserver_longrunning_requests{verb='WATCH'}"
+    watch-event-rate:
+      kind: "Panel"
+      spec:
+        display:
+          name: "Watch Event Rate (events/s)"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "sum by (kind) (rate(apiserver_watch_events_total[5m]))"
+    firing-alerts:
+      kind: "Panel"
+      spec:
+        display:
+          name: "Firing Alerts"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "ALERTS{alertname=~'.*[Aa]pi[Ss]erver.*|.*[Kk]ube[Aa]pi.*', alertstate='firing'}"
+  layouts:
+    - kind: "Grid"
+      spec:
+        display:
+          title: "Request Rate"
+          collapse:
+            open: true
+        items:
+          - x: 0
+            y: 0
+            width: 8
+            height: 8
+            content:
+              $ref: "#/spec/panels/request-rate"
+          - x: 8
+            y: 0
+            width: 8
+            height: 8
+            content:
+              $ref: "#/spec/panels/error-rate-5xx"
+          - x: 16
+            y: 0
+            width: 8
+            height: 8
+            content:
+              $ref: "#/spec/panels/error-rate-4xx"
+    - kind: "Grid"
+      spec:
+        display:
+          title: "Latency"
+          collapse:
+            open: true
+        items:
+          - x: 0
+            y: 0
+            width: 8
+            height: 8
+            content:
+              $ref: "#/spec/panels/latency-p99"
+          - x: 8
+            y: 0
+            width: 8
+            height: 8
+            content:
+              $ref: "#/spec/panels/latency-p50"
+          - x: 16
+            y: 0
+            width: 8
+            height: 8
+            content:
+              $ref: "#/spec/panels/latency-by-resource-p99"
+    - kind: "Grid"
+      spec:
+        display:
+          title: "Saturation"
+          collapse:
+            open: true
+        items:
+          - x: 0
+            y: 0
+            width: 8
+            height: 8
+            content:
+              $ref: "#/spec/panels/inflight-requests"
+          - x: 8
+            y: 0
+            width: 8
+            height: 8
+            content:
+              $ref: "#/spec/panels/queued-requests"
+          - x: 16
+            y: 0
+            width: 8
+            height: 8
+            content:
+              $ref: "#/spec/panels/dropped-requests"
+    - kind: "Grid"
+      spec:
+        display:
+          title: "Storage"
+          collapse:
+            open: true
+        items:
+          - x: 0
+            y: 0
+            width: 12
+            height: 8
+            content:
+              $ref: "#/spec/panels/storage-objects"
+          - x: 12
+            y: 0
+            width: 12
+            height: 8
+            content:
+              $ref: "#/spec/panels/storage-db-size"
+    - kind: "Grid"
+      spec:
+        display:
+          title: "Watches"
+          collapse:
+            open: true
+        items:
+          - x: 0
+            y: 0
+            width: 12
+            height: 8
+            content:
+              $ref: "#/spec/panels/watch-requests"
+          - x: 12
+            y: 0
+            width: 12
+            height: 8
+            content:
+              $ref: "#/spec/panels/watch-event-rate"
+    - kind: "Grid"
+      spec:
+        display:
+          title: "Alerts"
+          collapse:
+            open: true
+        items:
+          - x: 0
+            y: 0
+            width: 24
+            height: 8
+            content:
+              $ref: "#/spec/panels/firing-alerts"

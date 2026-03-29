@@ -1,0 +1,439 @@
+kind: "Dashboard"
+metadata:
+  name: "prometheus-overview"
+  project: "default"
+spec:
+  display:
+    name: "Prometheus Overview"
+    description: "Prometheus health, TSDB, scrape, and query performance from must-gather data"
+  duration: "1h"
+  refreshInterval: "0s"
+  panels:
+    targets-up:
+      kind: "Panel"
+      spec:
+        display:
+          name: "Targets Up"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "up"
+    active-series:
+      kind: "Panel"
+      spec:
+        display:
+          name: "Active Time Series"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "prometheus_tsdb_head_series"
+    ingestion-rate:
+      kind: "Panel"
+      spec:
+        display:
+          name: "Sample Ingestion Rate (samples/s)"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "rate(prometheus_tsdb_head_samples_appended_total[5m])"
+    tsdb-chunks:
+      kind: "Panel"
+      spec:
+        display:
+          name: "Head Chunks"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "prometheus_tsdb_head_chunks"
+    tsdb-blocks:
+      kind: "Panel"
+      spec:
+        display:
+          name: "Blocks Loaded"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "prometheus_tsdb_blocks_loaded"
+    tsdb-storage:
+      kind: "Panel"
+      spec:
+        display:
+          name: "TSDB Storage Size (bytes)"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "prometheus_tsdb_storage_blocks_bytes"
+    tsdb-wal-fsync-p99:
+      kind: "Panel"
+      spec:
+        display:
+          name: "WAL fsync Latency p99 (seconds)"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "histogram_quantile(0.99, rate(prometheus_tsdb_wal_fsync_duration_seconds_bucket[5m]))"
+    tsdb-gc-p99:
+      kind: "Panel"
+      spec:
+        display:
+          name: "Head GC Latency p99 (seconds)"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "histogram_quantile(0.99, rate(prometheus_tsdb_head_gc_duration_seconds_bucket[5m]))"
+    scrape-duration:
+      kind: "Panel"
+      spec:
+        display:
+          name: "Scrape Duration p99 (seconds)"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "histogram_quantile(0.99, rate(prometheus_target_interval_length_seconds_bucket[5m]))"
+    scrape-samples:
+      kind: "Panel"
+      spec:
+        display:
+          name: "Samples Scraped per Target"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "scrape_samples_scraped"
+    scrape-errors:
+      kind: "Panel"
+      spec:
+        display:
+          name: "Scrape Errors (rate)"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "rate(prometheus_target_scrapes_exceeded_sample_limit_total[5m])"
+    query-latency-p99:
+      kind: "Panel"
+      spec:
+        display:
+          name: "Query Latency p99 (seconds)"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "histogram_quantile(0.99, rate(prometheus_engine_query_duration_seconds_bucket[5m]))"
+    http-request-rate:
+      kind: "Panel"
+      spec:
+        display:
+          name: "HTTP Request Rate"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "rate(prometheus_http_requests_total[5m])"
+    http-latency-p99:
+      kind: "Panel"
+      spec:
+        display:
+          name: "HTTP Request Latency p99 (seconds)"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "histogram_quantile(0.99, rate(prometheus_http_request_duration_seconds_bucket[5m]))"
+    rule-eval-latency-p99:
+      kind: "Panel"
+      spec:
+        display:
+          name: "Rule Evaluation Latency p99 (seconds)"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "histogram_quantile(0.99, rate(prometheus_rule_evaluation_duration_seconds_bucket[5m]))"
+    rule-eval-failures:
+      kind: "Panel"
+      spec:
+        display:
+          name: "Rule Evaluation Failures (rate)"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "rate(prometheus_rule_evaluation_failures_total[5m])"
+    firing-alerts:
+      kind: "Panel"
+      spec:
+        display:
+          name: "Firing Alerts"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "ALERTS{alertname=~'.*[Pp]rometheus.*', alertstate='firing'}"
+  layouts:
+    - kind: "Grid"
+      spec:
+        display:
+          title: "Health"
+          collapse:
+            open: true
+        items:
+          - x: 0
+            y: 0
+            width: 8
+            height: 8
+            content:
+              $ref: "#/spec/panels/targets-up"
+          - x: 8
+            y: 0
+            width: 8
+            height: 8
+            content:
+              $ref: "#/spec/panels/active-series"
+          - x: 16
+            y: 0
+            width: 8
+            height: 8
+            content:
+              $ref: "#/spec/panels/ingestion-rate"
+    - kind: "Grid"
+      spec:
+        display:
+          title: "TSDB"
+          collapse:
+            open: true
+        items:
+          - x: 0
+            y: 0
+            width: 6
+            height: 8
+            content:
+              $ref: "#/spec/panels/tsdb-chunks"
+          - x: 6
+            y: 0
+            width: 6
+            height: 8
+            content:
+              $ref: "#/spec/panels/tsdb-blocks"
+          - x: 12
+            y: 0
+            width: 6
+            height: 8
+            content:
+              $ref: "#/spec/panels/tsdb-storage"
+          - x: 18
+            y: 0
+            width: 6
+            height: 8
+            content:
+              $ref: "#/spec/panels/tsdb-wal-fsync-p99"
+    - kind: "Grid"
+      spec:
+        display:
+          title: "Scrape"
+          collapse:
+            open: true
+        items:
+          - x: 0
+            y: 0
+            width: 8
+            height: 8
+            content:
+              $ref: "#/spec/panels/scrape-duration"
+          - x: 8
+            y: 0
+            width: 8
+            height: 8
+            content:
+              $ref: "#/spec/panels/scrape-samples"
+          - x: 16
+            y: 0
+            width: 8
+            height: 8
+            content:
+              $ref: "#/spec/panels/scrape-errors"
+    - kind: "Grid"
+      spec:
+        display:
+          title: "Query Performance"
+          collapse:
+            open: true
+        items:
+          - x: 0
+            y: 0
+            width: 8
+            height: 8
+            content:
+              $ref: "#/spec/panels/query-latency-p99"
+          - x: 8
+            y: 0
+            width: 8
+            height: 8
+            content:
+              $ref: "#/spec/panels/http-request-rate"
+          - x: 16
+            y: 0
+            width: 8
+            height: 8
+            content:
+              $ref: "#/spec/panels/http-latency-p99"
+    - kind: "Grid"
+      spec:
+        display:
+          title: "Rule Evaluation"
+          collapse:
+            open: true
+        items:
+          - x: 0
+            y: 0
+            width: 12
+            height: 8
+            content:
+              $ref: "#/spec/panels/rule-eval-latency-p99"
+          - x: 12
+            y: 0
+            width: 12
+            height: 8
+            content:
+              $ref: "#/spec/panels/rule-eval-failures"
+    - kind: "Grid"
+      spec:
+        display:
+          title: "Alerts"
+          collapse:
+            open: true
+        items:
+          - x: 0
+            y: 0
+            width: 24
+            height: 8
+            content:
+              $ref: "#/spec/panels/firing-alerts"

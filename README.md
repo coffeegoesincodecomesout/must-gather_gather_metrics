@@ -21,6 +21,53 @@ oc adm must-gather -- gather_metrics \
 --match="prometheus_build_info"
 ```
 
+API performance dashboard:
+```
+oc adm must-gather -- gather_metrics \
+--min-time=$(date --date='2 hours ago' +%s%3N) \
+--match="{__name__=~\'apiserver_.*\'}" \
+--match="ALERTS{alertname=~\'.*[Aa]pi[Ss]erver.*|.*[Kk]ube[Aa]pi.*\'}" \
+--match="prometheus_build_info"
+```
+
+Prometheus overview dashboard:
+```
+oc adm must-gather -- gather_metrics \
+--min-time=$(date --date='2 hours ago' +%s%3N) \
+--match="{__name__=~\'prometheus_.*\'}" \
+--match="{__name__=~\'scrape_.*\'}" \
+--match="up" \
+--match="ALERTS{alertname=~\'.*[Pp]rometheus.*\'}" \
+--match="prometheus_build_info"
+```
+
+Cluster USE method dashboard:
+```
+oc adm must-gather -- gather_metrics \
+--min-time=$(date --date='2 hours ago' +%s%3N) \
+--match="{__name__=~\'kube_pod_.*\'}" \
+--match="{__name__=~\'kube_node_.*\'}" \
+--match="{__name__=~\'kube_persistentvolume.*\'}" \
+--match="{__name__=~\'container_cpu_cfs_.*\'}" \
+--match="{__name__=~\'kubelet_volume_stats_.*\'}" \
+--match="ALERTS{alertname=~\'.*[Kk]ube.*|.*[Cc]luster.*\'}" \
+--match="prometheus_build_info"
+```
+
+Node USE method dashboard:
+```
+oc adm must-gather -- gather_metrics \
+--min-time=$(date --date='2 hours ago' +%s%3N) \
+--match="{__name__=~\'node_cpu_.*\'}" \
+--match="{__name__=~\'node_load.*\'}" \
+--match="{__name__=~\'node_memory_.*\'}" \
+--match="node_vmstat_pgmajfault" \
+--match="{__name__=~\'node_disk_.*\'}" \
+--match="{__name__=~\'node_network_.*\'}" \
+--match="ALERTS{alertname=~\'.*[Nn]ode.*\'}" \
+--match="prometheus_build_info"
+```
+
 Networking dashboard:
 ```
 oc adm must-gather -- gather_metrics \

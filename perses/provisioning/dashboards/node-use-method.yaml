@@ -1,0 +1,346 @@
+kind: "Dashboard"
+metadata:
+  name: "node-use-method"
+  project: "default"
+spec:
+  display:
+    name: "Node USE Method"
+    description: "Node Utilization, Saturation, and Errors from must-gather data"
+  duration: "1h"
+  refreshInterval: "0s"
+  panels:
+    cpu-utilization:
+      kind: "Panel"
+      spec:
+        display:
+          name: "CPU Utilization"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "avg by (instance) (rate(node_cpu_seconds_total{mode!='idle'}[5m]))"
+    cpu-saturation:
+      kind: "Panel"
+      spec:
+        display:
+          name: "CPU Saturation (load average 1m)"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "node_load1"
+    cpu-errors:
+      kind: "Panel"
+      spec:
+        display:
+          name: "CPU Errors (iowait rate)"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "avg by (instance) (rate(node_cpu_seconds_total{mode='iowait'}[5m]))"
+    memory-utilization:
+      kind: "Panel"
+      spec:
+        display:
+          name: "Memory Utilization"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes"
+    memory-saturation:
+      kind: "Panel"
+      spec:
+        display:
+          name: "Memory Saturation (major page faults rate)"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "rate(node_vmstat_pgmajfault[5m])"
+    memory-swap:
+      kind: "Panel"
+      spec:
+        display:
+          name: "Swap Utilization"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "1 - node_memory_SwapFree_bytes / node_memory_SwapTotal_bytes"
+    disk-utilization:
+      kind: "Panel"
+      spec:
+        display:
+          name: "Disk Utilization (I/O busy fraction)"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "rate(node_disk_io_time_seconds_total[5m])"
+    disk-saturation:
+      kind: "Panel"
+      spec:
+        display:
+          name: "Disk Saturation (weighted I/O time)"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "rate(node_disk_io_time_weighted_seconds_total[5m])"
+    disk-errors:
+      kind: "Panel"
+      spec:
+        display:
+          name: "Disk Errors (rate)"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "rate(node_disk_read_errors_total[5m]) + rate(node_disk_write_errors_total[5m])"
+    network-utilization:
+      kind: "Panel"
+      spec:
+        display:
+          name: "Network Utilization (bytes/s)"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "rate(node_network_receive_bytes_total{device!~'lo|veth.*|br.*|ovn.*|genev.*|tunl.*'}[5m]) + rate(node_network_transmit_bytes_total{device!~'lo|veth.*|br.*|ovn.*|genev.*|tunl.*'}[5m])"
+    network-saturation:
+      kind: "Panel"
+      spec:
+        display:
+          name: "Network Saturation (drops/s)"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "rate(node_network_receive_drop_total[5m]) + rate(node_network_transmit_drop_total[5m])"
+    network-errors:
+      kind: "Panel"
+      spec:
+        display:
+          name: "Network Errors (rate)"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "rate(node_network_receive_errs_total[5m]) + rate(node_network_transmit_errs_total[5m])"
+    firing-alerts:
+      kind: "Panel"
+      spec:
+        display:
+          name: "Firing Alerts"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "ALERTS{alertname=~'.*[Nn]ode.*', alertstate='firing'}"
+  layouts:
+    - kind: "Grid"
+      spec:
+        display:
+          title: "CPU"
+          collapse:
+            open: true
+        items:
+          - x: 0
+            y: 0
+            width: 8
+            height: 8
+            content:
+              $ref: "#/spec/panels/cpu-utilization"
+          - x: 8
+            y: 0
+            width: 8
+            height: 8
+            content:
+              $ref: "#/spec/panels/cpu-saturation"
+          - x: 16
+            y: 0
+            width: 8
+            height: 8
+            content:
+              $ref: "#/spec/panels/cpu-errors"
+    - kind: "Grid"
+      spec:
+        display:
+          title: "Memory"
+          collapse:
+            open: true
+        items:
+          - x: 0
+            y: 0
+            width: 8
+            height: 8
+            content:
+              $ref: "#/spec/panels/memory-utilization"
+          - x: 8
+            y: 0
+            width: 8
+            height: 8
+            content:
+              $ref: "#/spec/panels/memory-saturation"
+          - x: 16
+            y: 0
+            width: 8
+            height: 8
+            content:
+              $ref: "#/spec/panels/memory-swap"
+    - kind: "Grid"
+      spec:
+        display:
+          title: "Disk"
+          collapse:
+            open: true
+        items:
+          - x: 0
+            y: 0
+            width: 8
+            height: 8
+            content:
+              $ref: "#/spec/panels/disk-utilization"
+          - x: 8
+            y: 0
+            width: 8
+            height: 8
+            content:
+              $ref: "#/spec/panels/disk-saturation"
+          - x: 16
+            y: 0
+            width: 8
+            height: 8
+            content:
+              $ref: "#/spec/panels/disk-errors"
+    - kind: "Grid"
+      spec:
+        display:
+          title: "Network"
+          collapse:
+            open: true
+        items:
+          - x: 0
+            y: 0
+            width: 8
+            height: 8
+            content:
+              $ref: "#/spec/panels/network-utilization"
+          - x: 8
+            y: 0
+            width: 8
+            height: 8
+            content:
+              $ref: "#/spec/panels/network-saturation"
+          - x: 16
+            y: 0
+            width: 8
+            height: 8
+            content:
+              $ref: "#/spec/panels/network-errors"
+    - kind: "Grid"
+      spec:
+        display:
+          title: "Alerts"
+          collapse:
+            open: true
+        items:
+          - x: 0
+            y: 0
+            width: 24
+            height: 8
+            content:
+              $ref: "#/spec/panels/firing-alerts"
