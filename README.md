@@ -3,10 +3,21 @@
 `oc adm must-gather` can now collect metrics from a given cluster
 This feature is available from 4.18 + 
 
+etcd dashboard:
 ```
 oc adm must-gather -- gather_metrics \
 --min-time=$(date --date='2 hours ago' +%s%3N) \
 --match="{__name__=~\'etcd_.*\'}" \
+--match="ALERTS{alertname=~\'.*[Ee]tcd.*\'}" \
+--match="prometheus_build_info"
+```
+
+Loki dashboard:
+```
+oc adm must-gather -- gather_metrics \
+--min-time=$(date --date='2 hours ago' +%s%3N) \
+--match="{__name__=~\'loki_.*\'}" \
+--match="ALERTS{alertname=~\'.*[Ll]oki.*\'}" \
 --match="prometheus_build_info"
 ```
 

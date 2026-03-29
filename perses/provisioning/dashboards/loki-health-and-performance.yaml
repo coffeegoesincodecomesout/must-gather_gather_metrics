@@ -1,19 +1,19 @@
 kind: "Dashboard"
 metadata:
-  name: "etcd-health-and-performance"
+  name: "loki-health-and-performance"
   project: "default"
 spec:
   display:
-    name: "ETCD Health and Performance"
-    description: "etcd health and performance from must-gather data"
+    name: "Loki Health and Performance"
+    description: "Loki health and performance from must-gather data"
   duration: "1h"
   refreshInterval: "0s"
   panels:
-    has-leader:
+    ring-members:
       kind: "Panel"
       spec:
         display:
-          name: "Has Leader"
+          name: "Ring Members by State"
         plugin:
           kind: "TimeSeriesChart"
           spec:
@@ -25,12 +25,12 @@ spec:
               plugin:
                 kind: "PrometheusTimeSeriesQuery"
                 spec:
-                  query: "etcd_server_has_leader"
-    leader-changes:
+                  query: "loki_ring_members"
+    memory-streams:
       kind: "Panel"
       spec:
         display:
-          name: "Leader Changes"
+          name: "In-Memory Streams"
         plugin:
           kind: "TimeSeriesChart"
           spec:
@@ -42,12 +42,12 @@ spec:
               plugin:
                 kind: "PrometheusTimeSeriesQuery"
                 spec:
-                  query: "etcd_server_leader_changes_seen_total"
-    proposals-failed:
+                  query: "loki_ingester_memory_streams"
+    lines-received:
       kind: "Panel"
       spec:
         display:
-          name: "Failed Proposals"
+          name: "Lines Received (rate)"
         plugin:
           kind: "TimeSeriesChart"
           spec:
@@ -59,12 +59,12 @@ spec:
               plugin:
                 kind: "PrometheusTimeSeriesQuery"
                 spec:
-                  query: "etcd_server_proposals_failed_total"
-    proposals-pending:
+                  query: "rate(loki_distributor_lines_received_total[5m])"
+    bytes-received:
       kind: "Panel"
       spec:
         display:
-          name: "Pending Proposals"
+          name: "Bytes Received (rate)"
         plugin:
           kind: "TimeSeriesChart"
           spec:
@@ -76,12 +76,12 @@ spec:
               plugin:
                 kind: "PrometheusTimeSeriesQuery"
                 spec:
-                  query: "etcd_server_proposals_pending"
-    backend-commit-p99:
+                  query: "rate(loki_distributor_bytes_received_total[5m])"
+    memory-chunks:
       kind: "Panel"
       spec:
         display:
-          name: "Disk Backend Commit Latency p99 (seconds)"
+          name: "In-Memory Chunks"
         plugin:
           kind: "TimeSeriesChart"
           spec:
@@ -93,12 +93,12 @@ spec:
               plugin:
                 kind: "PrometheusTimeSeriesQuery"
                 spec:
-                  query: "histogram_quantile(0.99, rate(etcd_disk_backend_commit_duration_seconds_bucket[5m]))"
-    wal-fsync-p99:
+                  query: "loki_ingester_memory_chunks"
+    chunk-flush-p99:
       kind: "Panel"
       spec:
         display:
-          name: "WAL fsync Latency p99 (seconds)"
+          name: "Chunk Flush Latency p99 (seconds)"
         plugin:
           kind: "TimeSeriesChart"
           spec:
@@ -110,12 +110,12 @@ spec:
               plugin:
                 kind: "PrometheusTimeSeriesQuery"
                 spec:
-                  query: "histogram_quantile(0.99, rate(etcd_disk_wal_fsync_duration_seconds_bucket[5m]))"
-    db-size:
+                  query: "histogram_quantile(0.99, rate(loki_ingester_chunk_flush_duration_seconds_bucket[5m]))"
+    request-duration-p99:
       kind: "Panel"
       spec:
         display:
-          name: "DB Size (bytes)"
+          name: "Request Duration p99 (seconds)"
         plugin:
           kind: "TimeSeriesChart"
           spec:
@@ -127,12 +127,12 @@ spec:
               plugin:
                 kind: "PrometheusTimeSeriesQuery"
                 spec:
-                  query: "etcd_mvcc_db_total_size_in_bytes"
-    peer-rtt-p99:
+                  query: "histogram_quantile(0.99, rate(loki_request_duration_seconds_bucket[5m]))"
+    request-errors:
       kind: "Panel"
       spec:
         display:
-          name: "Peer Round-Trip Time p99 (seconds)"
+          name: "Request Errors (rate)"
         plugin:
           kind: "TimeSeriesChart"
           spec:
@@ -144,7 +144,7 @@ spec:
               plugin:
                 kind: "PrometheusTimeSeriesQuery"
                 spec:
-                  query: "histogram_quantile(0.99, rate(etcd_network_peer_round_trip_time_seconds_bucket[5m]))"
+                  query: "rate(loki_request_duration_seconds_count{status_code=~'5..'}[5m])"
     firing-alerts:
       kind: "Panel"
       spec:
@@ -161,7 +161,7 @@ spec:
               plugin:
                 kind: "PrometheusTimeSeriesQuery"
                 spec:
-                  query: "ALERTS{alertname=~'.*[Ee]tcd.*', alertstate='firing'}"
+                  query: "ALERTS{alertname=~'.*[Ll]oki.*', alertstate='firing'}"
   layouts:
     - kind: "Grid"
       spec:
@@ -172,32 +172,20 @@ spec:
         items:
           - x: 0
             y: 0
-            width: 6
+            width: 12
             height: 8
             content:
-              $ref: "#/spec/panels/has-leader"
-          - x: 6
-            y: 0
-            width: 6
-            height: 8
-            content:
-              $ref: "#/spec/panels/leader-changes"
+              $ref: "#/spec/panels/ring-members"
           - x: 12
             y: 0
-            width: 6
+            width: 12
             height: 8
             content:
-              $ref: "#/spec/panels/proposals-failed"
-          - x: 18
-            y: 0
-            width: 6
-            height: 8
-            content:
-              $ref: "#/spec/panels/proposals-pending"
+              $ref: "#/spec/panels/memory-streams"
     - kind: "Grid"
       spec:
         display:
-          title: "Disk Performance"
+          title: "Ingestion"
           collapse:
             open: true
         items:
@@ -206,32 +194,44 @@ spec:
             width: 8
             height: 8
             content:
-              $ref: "#/spec/panels/backend-commit-p99"
+              $ref: "#/spec/panels/lines-received"
           - x: 8
             y: 0
             width: 8
             height: 8
             content:
-              $ref: "#/spec/panels/wal-fsync-p99"
+              $ref: "#/spec/panels/bytes-received"
           - x: 16
             y: 0
             width: 8
             height: 8
             content:
-              $ref: "#/spec/panels/db-size"
+              $ref: "#/spec/panels/memory-chunks"
     - kind: "Grid"
       spec:
         display:
-          title: "Network"
+          title: "Query Performance"
           collapse:
             open: true
         items:
           - x: 0
             y: 0
-            width: 24
+            width: 8
             height: 8
             content:
-              $ref: "#/spec/panels/peer-rtt-p99"
+              $ref: "#/spec/panels/chunk-flush-p99"
+          - x: 8
+            y: 0
+            width: 8
+            height: 8
+            content:
+              $ref: "#/spec/panels/request-duration-p99"
+          - x: 16
+            y: 0
+            width: 8
+            height: 8
+            content:
+              $ref: "#/spec/panels/request-errors"
     - kind: "Grid"
       spec:
         display:
