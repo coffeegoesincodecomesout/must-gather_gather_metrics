@@ -3,6 +3,8 @@
 `oc adm must-gather` can now collect metrics from a given cluster:
  - This feature is available from 4.18 +
 
+Run the must-gather command within this repo or place a pre collected must-gather -- gather_metrics directory into the root of this repo.
+
 etcd dashboard:
 ```
 oc adm must-gather -- gather_metrics \
@@ -78,9 +80,6 @@ oc adm must-gather -- gather_metrics \
 --match="ALERTS{alertname=~\'.*[Pp]rometheus.*\'}" \
 --match="prometheus_build_info"
 ```
-
-Run the must-gather command within this repo or place a pre collected `must-gather -- gather_metrics` directory into the root of this repo.
-
 
 Running the launcher will result in the collected data being available via a running container
 
