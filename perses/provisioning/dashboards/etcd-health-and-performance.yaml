@@ -1,19 +1,19 @@
 kind: "Dashboard"
 metadata:
-  name: "cluster-overview"
+  name: "etcd-health-and-performance"
   project: "default"
 spec:
   display:
     name: "Cluster Overview"
-    description: "OpenShift cluster metrics from must-gather"
+    description: "etcd health and performance from must-gather data"
   duration: "1h"
   refreshInterval: "0s"
   panels:
-    node-ready:
+    has-leader:
       kind: "Panel"
       spec:
         display:
-          name: "Node Ready Status"
+          name: "Has Leader"
         plugin:
           kind: "TimeSeriesChart"
           spec:
@@ -25,12 +25,12 @@ spec:
               plugin:
                 kind: "PrometheusTimeSeriesQuery"
                 spec:
-                  query: "kube_node_status_condition{condition='Ready',status='true'}"
-    node-info:
+                  query: "etcd_server_has_leader"
+    leader-changes:
       kind: "Panel"
       spec:
         display:
-          name: "Node Info"
+          name: "Leader Changes"
         plugin:
           kind: "TimeSeriesChart"
           spec:
@@ -42,12 +42,12 @@ spec:
               plugin:
                 kind: "PrometheusTimeSeriesQuery"
                 spec:
-                  query: "kube_node_info"
-    pod-phases:
+                  query: "etcd_server_leader_changes_seen_total"
+    proposals-failed:
       kind: "Panel"
       spec:
         display:
-          name: "Pod Phases"
+          name: "Failed Proposals"
         plugin:
           kind: "TimeSeriesChart"
           spec:
@@ -59,12 +59,12 @@ spec:
               plugin:
                 kind: "PrometheusTimeSeriesQuery"
                 spec:
-                  query: "sum by (phase) (kube_pod_status_phase)"
-    container-restarts:
+                  query: "etcd_server_proposals_failed_total"
+    proposals-pending:
       kind: "Panel"
       spec:
         display:
-          name: "Container Restarts (rate)"
+          name: "Pending Proposals"
         plugin:
           kind: "TimeSeriesChart"
           spec:
@@ -76,12 +76,12 @@ spec:
               plugin:
                 kind: "PrometheusTimeSeriesQuery"
                 spec:
-                  query: "sum by (namespace, pod, container) (increase(kube_pod_container_status_restarts_total[5m])) > 0"
-    pod-not-running:
+                  query: "etcd_server_proposals_pending"
+    backend-commit-p99:
       kind: "Panel"
       spec:
         display:
-          name: "Pods Not Running"
+          name: "Disk Backend Commit Latency p99 (seconds)"
         plugin:
           kind: "TimeSeriesChart"
           spec:
@@ -93,12 +93,12 @@ spec:
               plugin:
                 kind: "PrometheusTimeSeriesQuery"
                 spec:
-                  query: "kube_pod_status_phase{phase!~'Running|Succeeded'}"
-    alerts-firing:
+                  query: "histogram_quantile(0.99, rate(etcd_disk_backend_commit_duration_seconds_bucket[5m]))"
+    wal-fsync-p99:
       kind: "Panel"
       spec:
         display:
-          name: "Alerts Firing"
+          name: "WAL fsync Latency p99 (seconds)"
         plugin:
           kind: "TimeSeriesChart"
           spec:
@@ -110,31 +110,77 @@ spec:
               plugin:
                 kind: "PrometheusTimeSeriesQuery"
                 spec:
-                  query: "ALERTS{alertstate='firing'}"
+                  query: "histogram_quantile(0.99, rate(etcd_disk_wal_fsync_duration_seconds_bucket[5m]))"
+    db-size:
+      kind: "Panel"
+      spec:
+        display:
+          name: "DB Size (bytes)"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "etcd_mvcc_db_total_size_in_bytes"
+    peer-rtt-p99:
+      kind: "Panel"
+      spec:
+        display:
+          name: "Peer Round-Trip Time p99 (seconds)"
+        plugin:
+          kind: "TimeSeriesChart"
+          spec:
+            legend:
+              position: "bottom"
+        queries:
+          - kind: "TimeSeriesQuery"
+            spec:
+              plugin:
+                kind: "PrometheusTimeSeriesQuery"
+                spec:
+                  query: "histogram_quantile(0.99, rate(etcd_network_peer_round_trip_time_seconds_bucket[5m]))"
   layouts:
-    - kind: "GridLayout"
+    - kind: "Grid"
       spec:
         display:
-          title: "Nodes"
+          title: "Health"
           collapse:
             open: true
         items:
           - x: 0
             y: 0
-            width: 12
+            width: 6
             height: 8
             content:
-              $ref: "#/spec/panels/node-ready"
+              $ref: "#/spec/panels/has-leader"
+          - x: 6
+            y: 0
+            width: 6
+            height: 8
+            content:
+              $ref: "#/spec/panels/leader-changes"
           - x: 12
             y: 0
-            width: 12
+            width: 6
             height: 8
             content:
-              $ref: "#/spec/panels/node-info"
-    - kind: "GridLayout"
+              $ref: "#/spec/panels/proposals-failed"
+          - x: 18
+            y: 0
+            width: 6
+            height: 8
+            content:
+              $ref: "#/spec/panels/proposals-pending"
+    - kind: "Grid"
       spec:
         display:
-          title: "Workloads"
+          title: "Disk Performance"
           collapse:
             open: true
         items:
@@ -143,23 +189,23 @@ spec:
             width: 8
             height: 8
             content:
-              $ref: "#/spec/panels/pod-phases"
+              $ref: "#/spec/panels/backend-commit-p99"
           - x: 8
             y: 0
             width: 8
             height: 8
             content:
-              $ref: "#/spec/panels/container-restarts"
+              $ref: "#/spec/panels/wal-fsync-p99"
           - x: 16
             y: 0
             width: 8
             height: 8
             content:
-              $ref: "#/spec/panels/pod-not-running"
-    - kind: "GridLayout"
+              $ref: "#/spec/panels/db-size"
+    - kind: "Grid"
       spec:
         display:
-          title: "Alerts"
+          title: "Network"
           collapse:
             open: true
         items:
@@ -168,4 +214,4 @@ spec:
             width: 24
             height: 8
             content:
-              $ref: "#/spec/panels/alerts-firing"
+              $ref: "#/spec/panels/peer-rtt-p99"

@@ -6,7 +6,8 @@ This feature is available from 4.18 +
 ```
 oc adm must-gather -- gather_metrics \
 --min-time=$(date --date='2 hours ago' +%s%3N) \
---match="{__name__=~\'kube_node_.*\'}"
+--match="{__name__=~\'etcd_.*\'}" \
+--match="prometheus_build_info"
 ```
 
 Run the must-gather command within this repo or place a pre collected `must-gather -- gather_metrics` directory into the root of this repo.

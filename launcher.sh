@@ -41,8 +41,10 @@ trap "echo 'stopping Prometheus...'; podman stop $PROM_CONTAINER" EXIT
 #Launch Perses (foreground)
 echo "launching Perses..."
 echo "Browse Perses at http://localhost:8080"
+mkdir -p perses/data
 podman run --rm --network=host \
   -v $PWD/perses/config.yaml:/etc/perses/config.yaml:Z \
   -v $PWD/perses/provisioning:/etc/perses/provisioning:Z \
+  -v $PWD/perses/data:/var/lib/perses:U,Z \
   persesdev/perses \
   --config=/etc/perses/config.yaml

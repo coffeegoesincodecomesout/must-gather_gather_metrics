@@ -9,7 +9,6 @@ spec:
   plugin:
     kind: "PrometheusDatasource"
     spec:
-      directUrl: "http://localhost:9090"
       proxy:
         kind: "HTTPProxy"
         spec:
@@ -17,3 +16,5 @@ spec:
           allowedEndpoints:
             - endpointPattern: "/api/v1/.*"
               method: "GET"
+            - endpointPattern: "/api/v1/.*"
+              method: "POST"
