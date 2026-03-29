@@ -87,4 +87,5 @@ Running the launcher will result in the collected data being available via a run
 ./launcher.sh
 ```
 
-Browse to http://localhost:9090 to start querying
+Browse to http://localhost:9090 to start querying the Prometheus UI
+Or http://localhost:8080 to view the Perses dashboards
